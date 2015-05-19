@@ -30,7 +30,8 @@ init()
 	echo "IP=$IP"
 	echo ""
   fi
-  PASSWD="r00tadmin"
+#  PASSWD="r00tadmin"
+  PASSWD="root"
   echo "请输入机器的root密码："
   read -p "(Default: $PASSWD):" temp
   if [ "$temp" != "" ]; then
