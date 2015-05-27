@@ -41,7 +41,7 @@ init()
   echo ""
  }
  
-init 
+#init 
 #yum install -y httpd
 httpdinstall(){
 rpm -ivh  soft/apr-util-ldap-1.3.9-3.el6_0.1.x86_64.rpm
@@ -49,7 +49,7 @@ rpm -ivh  soft/httpd-tools-2.2.15-15.el6.x86_64.rpm
 rpm -ivh  soft/httpd-2.2.15-15.el6.x86_64.rpm
 }
 
-httpdinstall
+#httpdinstall
 
 if grep sys_init /etc/httpd/conf/httpd.conf;then
 	:
@@ -65,13 +65,23 @@ Allow from all
 </Directory>
 EOF
 
-fi
-
 sed -i "/^Listen/d" /etc/httpd/conf/httpd.conf
 sed -i "/#Listen/a  \Listen 9999" /etc/httpd/conf/httpd.conf
+fi
 
 service httpd restart
 echo "httpd setup done!"
+
+
+  IP=`/sbin/ifconfig eth0| grep "inet addr"| grep -v "127.0.0.1"| grep -v "255.255.255.255" |awk '{print $2}'| awk -F":" '{print $2}'`
+if service httpd status ;
+then
+	:
+	else
+		echo "pls start httpd service"
+		exit 1
+	fi
+
 
 cp -rf $PWD/script/run.sh.base $PWD/script/run.sh
 sed -i "s/@KS@/$IP/g" $PWD/script/run.sh
@@ -104,10 +114,13 @@ auto_login_ssh(){
 }
 #auto_login_ssh root 192.168.218.199 "ls /root && ls /var"
 
+echo ""
+
+echo "需要先配置好httpd服务，跟目录为当前目录，运行在9999端口"
 
 for i in `cat $PWD/iphost`
 do
-	echo $PASSWD
+    PASSWD="r00tadmin"
 	echo $i
 	auto_login_ssh $PASSWD $i "rm -rf /root/run.sh && mkdir /root/post && touch /root/post/install.log && /usr/bin/wget -T3 -t2 http://$IP:9999/sys_init/script/run.sh -O /root/run.sh && /usr/bin/nohup sh /root/run.sh 2>&1 >/root/post/install.log &"
 done
